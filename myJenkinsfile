@@ -28,6 +28,6 @@ stage('Send Email Notification'){
     emailext body: '''build is over.
 regards,
 pravallika,
-8147340201.''', subject: 'buld is over', to: 'prvallikaa1909@gmai.com, chevurupravallika4@gmail.com'
+.''', subject: 'buld is over', to: 'prvallikaa1909@gmai.com'
 }
 }

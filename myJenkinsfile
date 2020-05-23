@@ -1,0 +1,33 @@
+node{ 
+    properties([
+    buildDiscarder(logRotator(numToKeepStr: '4')),
+    pipelineTriggers([
+        pollSCM('* * * * *')
+    ])
+  ])
+    
+    def mavenHome = tool name: "maven3.6.3"
+    stage('Git Clone'){
+       git branch: 'development', credentialsId: 'githubcredentials', url: 'https://github.com/pravallika-ch/maven-web-application.git'
+    }
+    stage('mvn clean package'){
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage('Generate SonarQube Report'){
+        sh "${mavenHome}/bin/mvn sonar:sonar"
+  }
+  stage('upload artifacts into nexus'){
+      sh "${mavenHome}/bin/mvn deploy"
+}
+stage('deploy appinto tomact'){
+    sshagent(['d8c4fd41-9a97-4fba-afe4-6a5cb9b242e5']) {
+        sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@13.232.189.46:/opt/apache-tomcat-9.0.34/webapps/"
+}
+}
+stage('Send Email Notification'){
+    emailext body: '''build is over.
+regards,
+pravallika,
+8147340201.''', subject: 'buld is over', to: 'prvallikaa1909@gmai.com, chevurupravallika4@gmail.com'
+}
+}
